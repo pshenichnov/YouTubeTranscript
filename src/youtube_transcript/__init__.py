@@ -11,10 +11,12 @@ from .models import (
     TranscriptUnavailable,
 )
 from .parsing import extract_video_id
+from .service import ExtractedTranscript, TranscriptExtractionResult, extract_transcripts
 from .storage import build_folder_name, sanitize_title, save_transcript
 
 __all__ = [
     "extract_video_id",
+    "extract_transcripts",
     "fetch_transcript",
     "fetch_all_transcripts",
     "fetch_video_title",
@@ -23,6 +25,8 @@ __all__ = [
     "build_folder_name",
     "sanitize_title",
     "save_transcript",
+    "ExtractedTranscript",
+    "TranscriptExtractionResult",
     "TranscriptSegment",
     "TranscriptError",
     "InvalidVideoInput",

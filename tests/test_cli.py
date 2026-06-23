@@ -2,7 +2,8 @@
 
 from datetime import date
 
-import youtube_transcript.cli as cli
+import youtube_transcript.service as service
+import youtube_transcript_cli.cli as cli
 from youtube_transcript.models import TranscriptSegment, TranscriptUnavailable
 
 _SEGMENTS = [
@@ -17,8 +18,8 @@ def _patch_pipeline(monkeypatch, *, transcripts=None, fetch_error=None, title=No
             raise fetch_error
         return transcripts
 
-    monkeypatch.setattr(cli, "fetch_all_transcripts", fake_fetch_all)
-    monkeypatch.setattr(cli, "fetch_video_title", lambda video_id: title)
+    monkeypatch.setattr(service, "fetch_all_transcripts", fake_fetch_all)
+    monkeypatch.setattr(service, "fetch_video_title", lambda video_id: title)
 
 
 def test_success_saves_one_file_per_language(monkeypatch, tmp_path, capsys):
@@ -58,7 +59,7 @@ def test_failure_prints_failed_to_stderr(monkeypatch, tmp_path, capsys):
 def test_invalid_input_fails_without_network(monkeypatch, tmp_path, capsys):
     # No pipeline patch needed: parsing rejects this before fetching runs.
     monkeypatch.setattr(
-        cli, "fetch_all_transcripts", lambda *a, **k: _must_not_be_called()
+        service, "fetch_all_transcripts", lambda *a, **k: _must_not_be_called()
     )
     rc = cli.main(["not a valid id !!!", "-o", str(tmp_path)])
     assert rc == 1

@@ -33,8 +33,9 @@ def fetch_transcript(
     # Imported lazily so importing this module (and the pure layers that don't
     # call it) never requires the dependency to be installed.
     from requests.exceptions import RequestException
-    from youtube_transcript_api import YouTubeTranscriptApi
     from youtube_transcript_api._errors import CouldNotRetrieveTranscript
+
+    from youtube_transcript_api import YouTubeTranscriptApi
 
     api = YouTubeTranscriptApi()
     try:
@@ -78,8 +79,9 @@ def fetch_all_transcripts(
             failed, or ``languages`` was given but none of them are available.
     """
     from requests.exceptions import RequestException
-    from youtube_transcript_api import YouTubeTranscriptApi
     from youtube_transcript_api._errors import CouldNotRetrieveTranscript
+
+    from youtube_transcript_api import YouTubeTranscriptApi
 
     wanted = set(languages) if languages else None
 
@@ -134,3 +136,37 @@ def fetch_video_title(video_id: str) -> str | None:
     if not isinstance(title, str) or not title.strip():
         return None
     return title.strip()
+
+
+_THUMBNAIL_URLS = (
+    "https://i.ytimg.com/vi/{video_id}/maxresdefault.jpg",
+    "https://i.ytimg.com/vi/{video_id}/hqdefault.jpg",
+)
+
+
+def fetch_video_thumbnail(video_id: str) -> bytes:
+    """Fetch the best available public JPEG thumbnail for ``video_id``.
+
+    YouTube may not have a ``maxresdefault`` image for every video, so this tries
+    that first and falls back to ``hqdefault``. A failure to retrieve either image
+    is reported as :class:`TranscriptUnavailable` so callers can reuse their
+    existing CLI/API error handling.
+    """
+    import requests
+    from requests.exceptions import RequestException
+
+    last_error: str | None = None
+    for template in _THUMBNAIL_URLS:
+        url = template.format(video_id=video_id)
+        try:
+            response = requests.get(url, timeout=10)
+        except RequestException as exc:
+            last_error = str(exc)
+            continue
+
+        if response.status_code == 200 and response.content:
+            return response.content
+        last_error = f"HTTP {response.status_code}"
+
+    detail = f": {last_error}" if last_error else ""
+    raise TranscriptUnavailable(f"thumbnail unavailable for this video{detail}")

@@ -14,6 +14,7 @@ from youtube_transcript_api._errors import CouldNotRetrieveTranscript
 from youtube_transcript.fetching import (
     fetch_all_transcripts,
     fetch_transcript,
+    fetch_video_thumbnail,
     fetch_video_title,
 )
 from youtube_transcript.models import TranscriptSegment, TranscriptUnavailable
@@ -143,8 +144,10 @@ def test_fetch_all_translates_transport_error(monkeypatch):
 
 
 class _FakeResponse:
-    def __init__(self, payload):
+    def __init__(self, payload=None, *, status_code=200, content=b""):
+        self.status_code = status_code
         self._payload = payload
+        self.content = content
 
     def raise_for_status(self):
         pass
@@ -172,3 +175,37 @@ def test_fetch_video_title_none_on_network_error(monkeypatch):
 def test_fetch_video_title_none_on_missing_title(monkeypatch):
     monkeypatch.setattr("requests.get", lambda *a, **k: _FakeResponse({}))
     assert fetch_video_title("abcdefghijk") is None
+
+
+def test_fetch_video_thumbnail_returns_maxres_image(monkeypatch):
+    calls = []
+
+    def fake_get(url, **kwargs):
+        calls.append(url)
+        return _FakeResponse(status_code=200, content=b"jpeg-bytes")
+
+    monkeypatch.setattr("requests.get", fake_get)
+
+    assert fetch_video_thumbnail("abcdefghijk") == b"jpeg-bytes"
+    assert calls == ["https://i.ytimg.com/vi/abcdefghijk/maxresdefault.jpg"]
+
+
+def test_fetch_video_thumbnail_falls_back_to_hqdefault(monkeypatch):
+    responses = [
+        _FakeResponse(status_code=404, content=b""),
+        _FakeResponse(status_code=200, content=b"fallback-jpeg"),
+    ]
+
+    monkeypatch.setattr("requests.get", lambda *a, **k: responses.pop(0))
+
+    assert fetch_video_thumbnail("abcdefghijk") == b"fallback-jpeg"
+
+
+def test_fetch_video_thumbnail_raises_when_unavailable(monkeypatch):
+    monkeypatch.setattr(
+        "requests.get",
+        lambda *a, **k: _FakeResponse(status_code=404, content=b""),
+    )
+
+    with pytest.raises(TranscriptUnavailable):
+        fetch_video_thumbnail("abcdefghijk")

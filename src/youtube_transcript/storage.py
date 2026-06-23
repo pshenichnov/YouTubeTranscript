@@ -13,9 +13,11 @@ module is the file write.
 
 from __future__ import annotations
 
+import json
 import re
 from datetime import date
 from pathlib import Path
+from typing import Any
 
 DEFAULT_OUTPUT_DIR = "Scripts"
 
@@ -76,4 +78,37 @@ def save_transcript(
 
     path = dest_dir / f"{video_id}.{language}.txt"
     path.write_text(text, encoding="utf-8")
+    return path
+
+
+def save_thumbnail(
+    content: bytes,
+    *,
+    video_id: str,
+    output_dir: str | Path = DEFAULT_OUTPUT_DIR,
+) -> Path:
+    """Write the video's thumbnail into the per-video subfolder."""
+    dest_dir = Path(output_dir) / build_folder_name(video_id)
+    dest_dir.mkdir(parents=True, exist_ok=True)
+
+    path = dest_dir / f"{video_id}.jpg"
+    path.write_bytes(content)
+    return path
+
+
+def save_metadata(
+    metadata: dict[str, Any],
+    *,
+    video_id: str,
+    output_dir: str | Path = DEFAULT_OUTPUT_DIR,
+) -> Path:
+    """Write the video's extraction metadata into the per-video subfolder."""
+    dest_dir = Path(output_dir) / build_folder_name(video_id)
+    dest_dir.mkdir(parents=True, exist_ok=True)
+
+    path = dest_dir / f"{video_id}.metadata.json"
+    path.write_text(
+        json.dumps(metadata, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
     return path

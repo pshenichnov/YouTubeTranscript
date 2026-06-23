@@ -1,5 +1,7 @@
 """Tests for the CLI's status-only console contract. No network."""
 
+import json
+
 import youtube_transcript.service as service
 import youtube_transcript_cli.cli as cli
 from youtube_transcript.models import TranscriptSegment, TranscriptUnavailable
@@ -18,6 +20,7 @@ def _patch_pipeline(monkeypatch, *, transcripts=None, fetch_error=None, title=No
 
     monkeypatch.setattr(service, "fetch_all_transcripts", fake_fetch_all)
     monkeypatch.setattr(service, "fetch_video_title", lambda video_id: title)
+    monkeypatch.setattr(service, "fetch_video_thumbnail", lambda video_id: b"jpeg-bytes")
 
 
 def test_success_saves_one_file_per_language(monkeypatch, tmp_path, capsys):
@@ -38,6 +41,32 @@ def test_success_saves_one_file_per_language(monkeypatch, tmp_path, capsys):
     folder = tmp_path / "dQw4w9WgXcQ"
     assert (folder / "dQw4w9WgXcQ.en.txt").read_text(encoding="utf-8") == "hello world"
     assert (folder / "dQw4w9WgXcQ.de.txt").read_text(encoding="utf-8") == "hello world"
+    assert not (folder / "dQw4w9WgXcQ.jpg").exists()
+    assert "thumbnail" not in out
+
+    metadata = json.loads((folder / "dQw4w9WgXcQ.metadata.json").read_text())
+    assert metadata["videoTitle"] == "Greeting"
+    assert metadata["videoLengthSeconds"] == 2.0
+    assert metadata["transcripts"] == ["en", "de"]
+
+
+def test_thumbnail_flag_saves_thumbnail(monkeypatch, tmp_path, capsys):
+    _patch_pipeline(
+        monkeypatch,
+        transcripts={"en": _SEGMENTS},
+        title="Greeting",
+    )
+
+    rc = cli.main(["dQw4w9WgXcQ", "-o", str(tmp_path), "--thumbnail"])
+    out = capsys.readouterr().out
+
+    folder = tmp_path / "dQw4w9WgXcQ"
+    assert rc == 0
+    assert (folder / "dQw4w9WgXcQ.jpg").read_bytes() == b"jpeg-bytes"
+    assert "thumbnail" in out
+
+    metadata = json.loads((folder / "dQw4w9WgXcQ.metadata.json").read_text())
+    assert metadata["transcripts"] == ["en"]
 
 
 def test_failure_prints_failed_to_stderr(monkeypatch, tmp_path, capsys):

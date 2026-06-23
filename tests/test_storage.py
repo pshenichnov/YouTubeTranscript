@@ -1,5 +1,6 @@
 """Tests for filesystem persistence. No network; writes go to tmp_path."""
 
+import json
 from datetime import date
 
 from youtube_transcript.storage import (
@@ -7,6 +8,8 @@ from youtube_transcript.storage import (
     MAX_TITLE_LEN,
     build_folder_name,
     sanitize_title,
+    save_metadata,
+    save_thumbnail,
     save_transcript,
 )
 
@@ -82,6 +85,27 @@ def test_save_creates_missing_output_dir(tmp_path):
     assert not out.exists()
     path = save_transcript("x", video_id="abcdefghijk", language="en", output_dir=out)
     assert path.exists()
+
+
+def test_save_thumbnail_uses_video_id_folder_and_jpg_file(tmp_path):
+    path = save_thumbnail(b"jpeg-bytes", video_id="abcdefghijk", output_dir=tmp_path)
+
+    assert path == tmp_path / "abcdefghijk" / "abcdefghijk.jpg"
+    assert path.read_bytes() == b"jpeg-bytes"
+
+
+def test_save_metadata_uses_video_metadata_json_file(tmp_path):
+    path = save_metadata(
+        {"videoTitle": "Привет", "transcripts": ["ru"]},
+        video_id="abcdefghijk",
+        output_dir=tmp_path,
+    )
+
+    assert path == tmp_path / "abcdefghijk" / "abcdefghijk.metadata.json"
+    assert json.loads(path.read_text(encoding="utf-8")) == {
+        "videoTitle": "Привет",
+        "transcripts": ["ru"],
+    }
 
 
 def test_default_output_dir_constant():

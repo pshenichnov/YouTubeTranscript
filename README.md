@@ -23,23 +23,37 @@ youtube-transcript dQw4w9WgXcQ -l de -l en
 # Save timestamped lines instead of one text block
 youtube-transcript dQw4w9WgXcQ --timestamps
 
+# Also save the video thumbnail
+youtube-transcript dQw4w9WgXcQ --thumbnail
+
 # Choose where transcripts are saved (default: ./Scripts)
 youtube-transcript dQw4w9WgXcQ -o C:\transcripts
 ```
 
 Or as a module: `python -m youtube_transcript <video>`.
 
-Transcripts are **saved to files**, not printed. Every available language is
-pulled (or just the `-l` ones), and each is written to its own file:
+Transcripts and video metadata are **saved to files**, not printed. Every
+available language is pulled (or just the `-l` ones), and each transcript gets a
+text file. One metadata JSON file is written per video:
 
 ```
 <output-dir>/<video-id>/<video-id>.<lang>.txt
+<output-dir>/<video-id>/<video-id>.metadata.json
+```
+
+When `--thumbnail` is passed, the CLI also saves:
+
+```
+<output-dir>/<video-id>/<video-id>.jpg
 ```
 
 The output folder defaults to `Scripts/` and is created if missing; inside it a
 per-video subfolder is named with the video ID. The console prints only a status line:
-`success: ...` (with the language count and folder) on success, or `failed: ...`
-on error.
+`success: ...` (with the language count and folder, plus the thumbnail path when
+requested) on success, or `failed: ...` on error.
+
+The metadata JSON includes the video ID, title, URL, transcript-derived video
+length, and a `transcripts` array with the extracted language codes.
 
 ## API
 

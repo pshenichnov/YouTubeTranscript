@@ -35,6 +35,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Prefix each line with a [mm:ss] timestamp.",
     )
     parser.add_argument(
+        "--thumbnail",
+        action="store_true",
+        help="Also save the video thumbnail as <video-id>.jpg.",
+    )
+    parser.add_argument(
         "-o",
         "--output-dir",
         dest="output_dir",
@@ -70,6 +75,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             args.video,
             languages=languages,
             timestamps=args.timestamps,
+            save_thumbnail_file=args.thumbnail,
             output_dir=args.output_dir,
         )
     except TranscriptError as exc:
@@ -86,7 +92,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         if transcript.saved_path is not None
     ]
     folder = saved_paths[0].parent if saved_paths else args.output_dir
-    print(f"success: saved {len(saved_paths)} language(s) [{codes}] to {folder}")
+    thumbnail = (
+        f" and thumbnail {result.thumbnail_path}"
+        if result.thumbnail_path is not None
+        else ""
+    )
+    print(f"success: saved {len(saved_paths)} language(s) [{codes}] to {folder}{thumbnail}")
     return 0
 
 

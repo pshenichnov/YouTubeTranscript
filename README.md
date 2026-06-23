@@ -70,6 +70,32 @@ Example request:
 }
 ```
 
+### Docker
+
+Build the API image:
+
+```bash
+docker build -t youtube-transcript-api .
+```
+
+Run the container:
+
+```bash
+mkdir -p Scripts
+docker run --rm -p 8000:8000 -v "$(pwd)/Scripts:/app/Scripts" youtube-transcript-api
+```
+
+Or build and run with Docker Compose:
+
+```bash
+mkdir -p Scripts
+docker compose up --build
+```
+
+Swagger UI will be available at <http://127.0.0.1:8000/docs>. When
+`saveToFiles` is `true`, transcript files are written to the host `Scripts/`
+folder through the container volume mount.
+
 ## Use as a library
 
 ```python

@@ -1,0 +1,13 @@
+services:
+  youtube-transcript-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: youtube-transcript-api:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./Scripts:/app/Scripts
+    environment:
+      PYTHONUNBUFFERED: "1"
+    restart: unless-stopped

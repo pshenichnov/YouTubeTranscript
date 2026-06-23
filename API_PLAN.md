@@ -15,8 +15,10 @@ application and an HTTP API without duplicating the core workflow.
   - Console application package.
   - Replaces the current direct CLI implementation while preserving the existing
     `youtube-transcript` command behavior.
-- `youtube_transcript_api`
-  - Future FastAPI application package.
+- `youtube_transcript_http_api`
+  - FastAPI application package.
+  - Named this way internally to avoid colliding with the third-party
+    `youtube_transcript_api` dependency.
   - Exposes Swagger/OpenAPI documentation and HTTP endpoints.
 
 ## Shared Core
@@ -51,17 +53,17 @@ Required compatibility guarantees:
 Scripts/<yyyy-mm-dd>-<video-title-or-id>/<video-id>.<language>.txt
 ```
 
-## Future API
+## API
 
 Use FastAPI for the API project because it provides Swagger/OpenAPI generation
 from typed request and response models.
 
-Recommended initial endpoints:
+Initial endpoints:
 
 - `GET /health`
 - `POST /transcripts/extract`
 
-`POST /transcripts/extract` should initially be synchronous:
+`POST /transcripts/extract` is synchronous:
 
 - `200 OK` means extraction finished successfully.
 - `400 Bad Request` for invalid video input.

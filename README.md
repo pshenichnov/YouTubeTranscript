@@ -42,6 +42,34 @@ the video ID when no title is available). The console prints only a status line:
 `success: ...` (with the language count and folder) on success, or `failed: ...`
 on error.
 
+## API
+
+Install API dependencies and start the FastAPI app:
+
+```powershell
+pip install -e ".[api]"
+youtube-transcript-api
+```
+
+Swagger UI is available at <http://127.0.0.1:8000/docs>.
+
+`POST /transcripts/extract` is synchronous: `200 OK` means fetching, formatting,
+and optional file saving have finished. The response includes `completed`,
+`videoId`, `title`, `saved`, `transcriptCount`, and one `transcripts` entry per
+language with `text`, `segments`, and `savedPath`.
+
+Example request:
+
+```json
+{
+  "video": "https://youtu.be/dQw4w9WgXcQ",
+  "languages": ["en"],
+  "timestamps": false,
+  "saveToFiles": true,
+  "outputDir": "Scripts"
+}
+```
+
 ## Use as a library
 
 ```python

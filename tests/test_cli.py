@@ -1,7 +1,5 @@
 """Tests for the CLI's status-only console contract. No network."""
 
-from datetime import date
-
 import youtube_transcript.service as service
 import youtube_transcript_cli.cli as cli
 from youtube_transcript.models import TranscriptSegment, TranscriptUnavailable
@@ -37,7 +35,7 @@ def test_success_saves_one_file_per_language(monkeypatch, tmp_path, capsys):
     # Transcript text must NOT appear on the console.
     assert "hello" not in out and "world" not in out
 
-    folder = tmp_path / f"{date.today().isoformat()}-Greeting"
+    folder = tmp_path / "dQw4w9WgXcQ"
     assert (folder / "dQw4w9WgXcQ.en.txt").read_text(encoding="utf-8") == "hello world"
     assert (folder / "dQw4w9WgXcQ.de.txt").read_text(encoding="utf-8") == "hello world"
 

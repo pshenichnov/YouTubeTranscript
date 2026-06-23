@@ -2,14 +2,13 @@
 
 Layout produced by :func:`save_transcript`::
 
-    <output_dir>/<yyyy-mm-dd>-<video-title-or-id>/<video_id>.<lang>.txt
+    <output_dir>/<video_id>/<video_id>.<lang>.txt
 
 The output folder defaults to ``Scripts``. Inside it, a per-video subfolder is
-named ``<extraction-date>-<title>``, where the title is a sanitized short video
-title (falling back to the canonical video ID when no usable title is
-available). One file is written per transcript language. Sanitization
-(:func:`sanitize_title`) and folder-name construction (:func:`build_folder_name`)
-are pure functions; the only side effect in this module is the file write.
+named with the canonical video ID. One file is written per transcript language.
+Sanitization (:func:`sanitize_title`) and folder-name construction
+(:func:`build_folder_name`) are pure functions; the only side effect in this
+module is the file write.
 """
 
 from __future__ import annotations
@@ -47,15 +46,12 @@ def build_folder_name(
     title: str | None = None,
     on: date | None = None,
 ) -> str:
-    """Build the per-video subfolder name: ``<yyyy-mm-dd>-<title-or-id>``.
+    """Build the per-video subfolder name: ``<video_id>``.
 
-    ``on`` defaults to today's date (the extraction date).
+    ``title`` and ``on`` are accepted for backward-compatible callers but no
+    longer affect folder naming.
     """
-    stamp = (on or date.today()).isoformat()
-    base = sanitize_title(title) if title else ""
-    if not base:
-        base = video_id
-    return f"{stamp}-{base}"
+    return video_id
 
 
 def save_transcript(
@@ -67,11 +63,11 @@ def save_transcript(
     output_dir: str | Path = DEFAULT_OUTPUT_DIR,
     on: date | None = None,
 ) -> Path:
-    """Write one language's ``text`` into the dated per-video subfolder.
+    """Write one language's ``text`` into the per-video subfolder.
 
-    The file is ``<output_dir>/<date>-<title-or-id>/<video_id>.<language>.txt``.
-    Folders are created if missing (idempotent); re-running for the same video,
-    language, and date overwrites the file.
+    The file is ``<output_dir>/<video_id>/<video_id>.<language>.txt``. Folders
+    are created if missing (idempotent); re-running for the same video and
+    language overwrites the file.
 
     Returns the path of the written file.
     """

@@ -33,12 +33,11 @@ Transcripts are **saved to files**, not printed. Every available language is
 pulled (or just the `-l` ones), and each is written to its own file:
 
 ```
-<output-dir>/<yyyy-mm-dd>-<video-title>/<video-id>.<lang>.txt
+<output-dir>/<video-id>/<video-id>.<lang>.txt
 ```
 
 The output folder defaults to `Scripts/` and is created if missing; inside it a
-per-video subfolder is named `<extraction-date>-<video-title>` (falling back to
-the video ID when no title is available). The console prints only a status line:
+per-video subfolder is named with the video ID. The console prints only a status line:
 `success: ...` (with the language count and folder) on success, or `failed: ...`
 on error.
 

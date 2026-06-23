@@ -29,16 +29,16 @@ def test_sanitize_unusable_title_becomes_empty():
     assert sanitize_title("///") == ""
 
 
-def test_folder_name_prefixes_extraction_date():
-    assert build_folder_name("abcdefghijk", "My: Video", on=_ON) == "2026-01-02-My Video"
+def test_folder_name_uses_video_id():
+    assert build_folder_name("abcdefghijk", "My: Video", on=_ON) == "abcdefghijk"
 
 
-def test_folder_name_falls_back_to_video_id():
-    assert build_folder_name("abcdefghijk", None, on=_ON) == "2026-01-02-abcdefghijk"
-    assert build_folder_name("abcdefghijk", "???", on=_ON) == "2026-01-02-abcdefghijk"
+def test_folder_name_ignores_missing_or_unusable_title():
+    assert build_folder_name("abcdefghijk", None, on=_ON) == "abcdefghijk"
+    assert build_folder_name("abcdefghijk", "???", on=_ON) == "abcdefghijk"
 
 
-def test_save_uses_dated_title_folder_and_language_file(tmp_path):
+def test_save_uses_video_id_folder_and_language_file(tmp_path):
     path = save_transcript(
         "hello world",
         video_id="abcdefghijk",
@@ -47,7 +47,7 @@ def test_save_uses_dated_title_folder_and_language_file(tmp_path):
         output_dir=tmp_path,
         on=_ON,
     )
-    assert path == tmp_path / "2026-01-02-My Great Video" / "abcdefghijk.en.txt"
+    assert path == tmp_path / "abcdefghijk" / "abcdefghijk.en.txt"
     assert path.read_text(encoding="utf-8") == "hello world"
 
 
@@ -66,7 +66,7 @@ def test_save_separate_file_per_language_same_folder(tmp_path):
 def test_save_falls_back_to_video_id_when_no_title(tmp_path):
     path = save_transcript("body", video_id="abcdefghijk", language="en",
                           title=None, output_dir=tmp_path, on=_ON)
-    assert path == tmp_path / "2026-01-02-abcdefghijk" / "abcdefghijk.en.txt"
+    assert path == tmp_path / "abcdefghijk" / "abcdefghijk.en.txt"
 
 
 def test_save_is_idempotent_and_overwrites(tmp_path):

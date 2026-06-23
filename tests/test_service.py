@@ -1,7 +1,5 @@
 """Tests for the reusable extraction service. No network."""
 
-from datetime import date
-
 import youtube_transcript.service as service
 from youtube_transcript.models import TranscriptSegment
 
@@ -34,7 +32,7 @@ def test_extract_transcripts_formats_and_saves(monkeypatch, tmp_path):
     assert transcript.text == "hello world"
     assert transcript.segments == _SEGMENTS
 
-    folder = tmp_path / f"{date.today().isoformat()}-Greeting"
+    folder = tmp_path / "dQw4w9WgXcQ"
     assert transcript.saved_path == folder / "dQw4w9WgXcQ.en.txt"
     assert transcript.saved_path.read_text(encoding="utf-8") == "hello world"
 

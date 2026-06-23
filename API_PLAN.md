@@ -50,7 +50,7 @@ Required compatibility guarantees:
 - Default output layout remains:
 
 ```text
-Scripts/<yyyy-mm-dd>-<video-title-or-id>/<video-id>.<language>.txt
+Scripts/<video-id>/<video-id>.<language>.txt
 ```
 
 ## API
@@ -61,13 +61,16 @@ from typed request and response models.
 Initial endpoints:
 
 - `GET /health`
-- `POST /transcripts/extract`
+- `POST /videos`
+- `GET /videos/{id}/{language}`
+- `GET /videos/{id}/thumbnail`
+- `GET /videos/{id}/metadata`
 
-`POST /transcripts/extract` is synchronous:
+`POST /videos` is synchronous:
 
 - `200 OK` means extraction finished successfully.
 - `400 Bad Request` for invalid video input.
-- `404 Not Found` for unavailable transcripts or requested languages.
+- `404 Not Found` for unavailable transcripts.
 - `502 Bad Gateway` for upstream/network retrieval failures if distinguishable.
 - `500 Internal Server Error` for unexpected failures.
 

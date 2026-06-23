@@ -66,21 +66,27 @@ youtube-transcript-api
 
 Swagger UI is available at <http://127.0.0.1:8000/docs>.
 
-`POST /transcripts/extract` is synchronous: `200 OK` means fetching, formatting,
-and optional file saving have finished. The response includes `completed`,
-`videoId`, `title`, `saved`, `transcriptCount`, and one `transcripts` entry per
-language with `text`, `segments`, and `savedPath`.
+`POST /videos` is synchronous: `200 OK` means fetching, formatting, optional
+thumbnail saving, and metadata saving have finished. The response contains only
+compact metadata, not transcript text.
 
 Example request:
 
 ```json
 {
-  "video": "https://youtu.be/dQw4w9WgXcQ",
-  "languages": ["en"],
+  "id": "dQw4w9WgXcQ",
   "timestamps": false,
-  "saveToFiles": true,
-  "outputDir": "Scripts"
+  "thumbnail": false
 }
+```
+
+Available video endpoints:
+
+```text
+POST /videos
+GET /videos/{id}/{language}
+GET /videos/{id}/thumbnail
+GET /videos/{id}/metadata
 ```
 
 ### Docker
@@ -105,9 +111,9 @@ mkdir -p Scripts
 docker compose up --build
 ```
 
-Swagger UI will be available at <http://127.0.0.1:8000/docs>. When
-`saveToFiles` is `true`, transcript files are written to the host `Scripts/`
-folder through the container volume mount.
+Swagger UI will be available at <http://127.0.0.1:8000/docs>. Transcript,
+metadata, and optional thumbnail files are written to the host `Scripts/` folder
+through the container volume mount.
 
 ## Use as a library
 
